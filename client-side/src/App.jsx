@@ -1,34 +1,54 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect } from "react"
+import { useState } from "react"
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [users, setUsers] = useState([])
+
+  useEffect(() => {
+    fetch('http://localhost:5000/users')
+      .then(res => res.json())
+      .then(data => setUsers(data))
+  }, [])
+
+  const handleAddUser = event => {
+    event.preventDefault();
+    const form = event.target;
+    const name = form.name.value;
+    const email = form.email.value;
+    const user = { name, email }
+    console.log(user);
+    fetch('http://localhost:5000/users', {
+      method: 'POST',
+      headers: {
+        'content-type' : 'application/json'
+      },
+      body: JSON.stringify(user)
+
+    })
+      .then(res => res.json()
+        .then(data => {
+          console.log('inside post response', data)
+
+        }))
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="flex flex-col w-full h-fit justify-center items-center">
+      <h1>User Managements system</h1>
+      <h3>Number of users: {users.length}</h3>
+      <form onSubmit={handleAddUser} className="flex flex-col items-center">
+        <input className="border-white border-2 p-3 rounded-lg bg-blue-400 text-white font-semibold" type="text" name="name" id="" />
+        <br />
+        <input className="border-white border-2 p-3 rounded-lg bg-blue-400 text-white font-semibold" type="email" name="email" id="" />
+        <br />
+        <input className="border-white border-2 p-3 w-full rounded-lg bg-blue-400 text-white font-bold" type="submit" value="Add User" />
+      </form>
+      <div className="flex flex-col w-[60%] h-fit gap-5 border-2 px-10 py-20">
+        {
+          users.map(user => <p className="bg-amber-100 text-black p-5 rounded-xl" key={user.id} >{user.id} <br />{user.name} <br /> {user.email}</p>)
+        }
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
